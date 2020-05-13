@@ -144,7 +144,7 @@ def belief_propagation(graph,obs_time,dist):
                 if not np.isclose(new_msg,old_msg).all():
                     converged=False
                 g.nodes[fact]['msg'][n]=new_msg
-    #print("Converged in ", count, " steps")
+    print("Converged in ", count, " steps")
     
     source_est = -1
     maxV=0
