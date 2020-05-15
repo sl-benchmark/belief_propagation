@@ -23,10 +23,10 @@ print("Path on 20 nodes, source rank ",rank)
 
 
 graph=nx.erdos_renyi_graph(20,0.5)
-dist=st.expon()
+dist=st.expon(0.5)
 source=10
 infected = nx.single_source_dijkstra_path_length(graph, source)
-obs=[0,19]
+obs=[0,19,1,2,3,4,5,6,7,8]
 obs_time = dict((k,v) for k,v in infected.items() if k in obs)
 
 res=sl.belief_propagation(graph, obs_time, dist)[1]

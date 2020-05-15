@@ -83,19 +83,16 @@ def chi(ti, tj, pi, pj,dist): #ti: i's belief of its infection time sent to j, p
     else:
         return 0
 
+
 def chi2(ti, tj, pi, pj,dist): #only j can infect i
-    if (pj==1):
+    if (pj==1): #i cannot be a parent of j
         return 0
-    elif (pi==0): #j is not a parent of i
-        if  (ti<=tj): # i was born before j, so we do not need any more information
-            return 1
-        else: # i was born after j, so we must assure that j didn't infect i
-            return 1-dist.cdf(ti-tj)
-    else: #j is a parent of i
-        if (ti<=tj): # i was born before j; this is impossible
-            return 0
-        else:
-            return dist.cdf(ti-tj)-dist.cdf(ti-tj-1)
+    if (pi==0): #j is not a parent of i
+        return 1
+    elif (ti==tj): #if j is a parent is must immidiately infect
+        return 1
+    else: 
+        return 0
         
 def pri_message(fact,n,g,T,lam,Omatrix,Omatrix2,obs_time,N):
     tmp = np.vstack([np.ones(T),np.zeros(T)])*lam
@@ -110,10 +107,17 @@ def belief_propagation(graph,obs_time,dist):
     ########################### Init graph
     g = nx.Graph()
     N=graph.number_of_nodes()
-    T=int(2*max(dist.mean()*N,max(obs_time.values())))
-    lam = 0.001/N
+    T=int(2*max(dist.mean()*N,max(obs_time.values())-min(obs_time.values())))
+    lam = 0.01/N
+    nodes = list(graph.nodes())
+    source_est_list = []
+    source_est_last = -1
+    source_est_last_num = 0
+
+
     for key, val in obs_time.items():
-        obs_time[key]+=int(dist.mean()*N/2)
+        obs_time[key]+=int(min(obs_time.values())+dist.mean()*N/2)
+    print(obs_time)
     
     for n in graph.nodes():
         g.add_node(("psi",n), typ='factor', fun=psi_message)
@@ -137,27 +141,44 @@ def belief_propagation(graph,obs_time,dist):
     while (not converged) and (count<100):
         converged = True
         count+=1
-        for fact in g.nodes():
-            for n,old_msg in g.nodes[fact]['msg'].items():
-                new_msg = g.nodes[fact]['fun'](fact,n,g,T,lam,Omatrix,Omatrix2,obs_time,N)
-                new_msg =new_msg/np.sum(new_msg)
-                if not np.isclose(new_msg,old_msg).all():
-                    converged=False
-                g.nodes[fact]['msg'][n]=new_msg
-    print("Converged in ", count, " steps")
-    
-    source_est = -1
-    maxV=0
-    marg=0
-    scores = {}
-    for n in graph.nodes():
-        marg = np.multiply(g.node[('pri',n+N)]['msg'][('ph2',(n,n+N))],g.node[('ph2',(n,n+N))]['msg'][('pri',n+N)])[0,:]
-        marg=marg/np.sum(marg)
-        scores[n]=np.sum(marg[0:-1])
-        if np.sum(marg[0:-1])>maxV:
-            maxV=np.sum(marg[0:-1])
-            source_est = n
-    #print("Source estimate: ",source_est, " (", maxV,")")
+        order = [x[1] for x in nx.bfs_edges(g,("psi",nodes[np.random.randint(len(graph.nodes()))]) )] #message scheduling
+        for rev in range(2):
+            order.reverse()
+            for fact in order:
+                for n,old_msg in g.nodes[fact]['msg'].items():
+                    new_msg = g.nodes[fact]['fun'](fact,n,g,T,lam,Omatrix,Omatrix2,obs_time,N)
+                    new_msg =new_msg/np.sum(new_msg)
+                    if not np.isclose(new_msg,old_msg).all():
+                        converged=False
+                    mu = 1 #min(1,10/count)
+                    g.nodes[fact]['msg'][n]=mu*new_msg + (1-mu)*g.nodes[fact]['msg'][n]
+                
+        print("", count, " steps")
+        source_est = -1
+        maxV=0
+        marg=0
+        source_est_list.append([])
+        for n in graph.nodes():
+            marg = np.multiply(g.node[('pri',n+N)]['msg'][('ph2',(n,n+N))],g.node[('ph2',(n,n+N))]['msg'][('pri',n+N)])[0,:]
+            marg=marg/np.sum(marg)
+            source_est_list[count-1].append(np.sum(marg[0:-1]))
+        #    plt.figure()
+        #    plt.bar(range(len(marg)),marg)
+        #    plt.title(str(n)+" " +str(np.sum(marg[0:-1])))
+            if np.sum(marg[0:-1])>maxV:
+                maxV=np.sum(marg[0:-1])
+                source_est = n
+
+        if (source_est == source_est_last):
+            source_est_last_num +=1
+            if (source_est_last_num == 10):
+                converged = True
+        else:
+            source_est_last_num = 0
+            source_est_last = source_est
+        print("Source estimate: ",source_est, " (", maxV,")")
+    scores = dict(zip(list(graph.nodes),np.mean(np.array(source_est_list)[max(0,len(source_est_list)-10):,:],0)))
     scores = sorted(scores.items(), key=operator.itemgetter(1), reverse=True)
-    return (source_est,scores)
+    print(scores)
+    return (scores[0][0],scores)
 
