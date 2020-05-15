@@ -150,7 +150,7 @@ def belief_propagation(graph,obs_time,dist):
                     new_msg =new_msg/np.sum(new_msg)
                     if not np.isclose(new_msg,old_msg).all():
                         converged=False
-                    mu = 1 #min(1,10/count)
+                    mu = 1 if count<10 else 0.7
                     g.nodes[fact]['msg'][n]=mu*new_msg + (1-mu)*g.nodes[fact]['msg'][n]
                 
         print("", count, " steps")
