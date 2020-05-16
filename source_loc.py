@@ -121,7 +121,7 @@ def belief_propagation(graph,obs_time,dist):
         g.add_node(("psi",n), typ='factor', fun=psi_message)
         g.add_node(("ph2",(n,n+N)), typ='factor', fun=ph2_message)
         g.add_node(("pri",n+N), typ='factor', fun=pri_message)    
-        g.add_path([("psi",n),("ph2",(n,n+N)),("pri",n+N)])
+        g.add_edges_from([(("psi",n),("ph2",(n,n+N))),(("ph2",(n,n+N)),("pri",n+N))]
     
         
     g.add_nodes_from([("phi",e) for e in graph.edges()], typ='factor', fun=phi_message)
