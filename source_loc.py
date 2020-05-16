@@ -115,7 +115,7 @@ def belief_propagation(graph,obs_time,dist):
 
     for key, val in obs_time.items():
         obs_time[key]+=int(min(obs_time.values())+dist.mean()*N/2)
-    print(obs_time)
+    #print(obs_time)
     
     for n in graph.nodes():
         g.add_node(("psi",n), typ='factor', fun=psi_message)
@@ -151,7 +151,7 @@ def belief_propagation(graph,obs_time,dist):
                     mu = 1 if count<10 else 0.7
                     g.nodes[fact]['msg'][n]=mu*new_msg + (1-mu)*g.nodes[fact]['msg'][n]
                 
-        print("", count, " steps")
+        #print("", count, " steps")
         source_est = -1
         maxV=0
         marg=0
@@ -174,9 +174,9 @@ def belief_propagation(graph,obs_time,dist):
         else:
             source_est_last_num = 0
             source_est_last = source_est
-        print("Source estimate: ",source_est, " (", maxV,")")
+        #print("Source estimate: ",source_est, " (", maxV,")")
     scores = dict(zip(list(graph.nodes),np.mean(np.array(source_est_list)[max(0,len(source_est_list)-10):,:],0)))
     scores = sorted(scores.items(), key=operator.itemgetter(1), reverse=True)
-    print(scores)
+    #print(scores)
     return (scores[0][0],scores)
 
