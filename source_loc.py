@@ -158,7 +158,7 @@ def belief_propagation(graph,obs_time,dist):
         marg=0
         source_est_list.append([])
         for n in graph.nodes():
-            marg = np.multiply(g.node[('pri',n+N)]['msg'][('ph2',(n,n+N))],g.node[('ph2',(n,n+N))]['msg'][('pri',n+N)])[0,:]
+            marg = np.multiply(g.nodes[('pri',n+N)]['msg'][('ph2',(n,n+N))],g.nodes[('ph2',(n,n+N))]['msg'][('pri',n+N)])[0,:]
             marg=marg/np.sum(marg)
             source_est_list[count-1].append(np.sum(marg[0:-1]))
         #    plt.figure()
