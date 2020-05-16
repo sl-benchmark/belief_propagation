@@ -105,7 +105,7 @@ def belief_propagation(graph,obs_time,dist):
     ########################### Init graph
     g = nx.Graph()
     N=graph.number_of_nodes()
-    T=int(max(dist.mean()*N+max(obs_time.values())-min(obs_time.values())))
+    T=int(dist.mean()*N+max(obs_time.values())-min(obs_time.values()))
     lam = 0.01/N
     nodes = list(graph.nodes())
     source_est_list = []
