@@ -1,5 +1,3 @@
-import os
-os.chdir('../')
 import networkx as nx
 import numpy as np
 #import source_loc as sl
