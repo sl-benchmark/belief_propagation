@@ -114,7 +114,7 @@ def belief_propagation(graph,obs_time,dist):
 
 
     for key, val in obs_time.items():
-        obs_time[key]+=int(dist.mean()*N/2-min(obs_time.values()))
+        obs_time[key]=val+int(dist.mean()*N/2-min(obs_time.values()))
     #print(obs_time)
     
     for n in graph.nodes():
