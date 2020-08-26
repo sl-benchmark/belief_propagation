@@ -23,6 +23,7 @@ print("Path on 20 nodes, source rank ",rank)
 
 
 graph=nx.erdos_renyi_graph(20,0.5)
+graph=max((graph.subgraph(c) for c in nx.connected_components(graph)), key=len)
 dist=st.expon(0.5)
 source=10
 infected = nx.single_source_dijkstra_path_length(graph, source)

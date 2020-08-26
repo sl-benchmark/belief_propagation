@@ -101,10 +101,15 @@ def get_marginal(n,g,T,lam,Omatrix,Omatrix2):
     Prod1=psi_message(('psi',n),-1,g,T,lam,Omatrix,Omatrix2)[0]
     return Prod1/np.sum(Prod1)
 
-def belief_propagation(graph,obs_time,dist):
+def belief_propagation(graph,obs_time_raw,dist):
     ########################### Init graph
     g = nx.Graph()
     N=graph.number_of_nodes()
+    nodeLabelToId = dict(zip(list(graph.nodes()),list(range(N))))
+    nodeIdToLabel = dict(zip(list(range(N)),list(graph.nodes())))
+    graph=nx.relabel_nodes(graph, nodeLabelToId)
+    obs_time = { nodeLabelToId[k]:v for k,v in obs_time_raw.items() }
+
     T=int(dist.mean()*N+max(obs_time.values())-min(obs_time.values()))
     lam = 0.01/N
     nodes = list(graph.nodes())
@@ -176,8 +181,10 @@ def belief_propagation(graph,obs_time,dist):
             source_est_last_num = 0
             source_est_last = source_est
         #print("Source estimate: ",source_est, " (", maxV,")")
-    scores = dict(zip(list(graph.nodes),np.mean(np.array(source_est_list)[max(0,len(source_est_list)-10):,:],0)))
+    scores_raw = dict(zip(list(graph.nodes),np.mean(np.array(source_est_list)[max(0,len(source_est_list)-10):,:],0)))
+    scores = { nodeIdToLabel[k]:v for k,v in scores_raw.items() }
     scores = sorted(scores.items(), key=operator.itemgetter(1), reverse=True)
-    #print(scores)
+    print(scores)
+    print(obs_time)
     return (scores[0][0],scores)
 
