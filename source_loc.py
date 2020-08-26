@@ -184,7 +184,5 @@ def belief_propagation(graph,obs_time_raw,dist):
     scores_raw = dict(zip(list(graph.nodes),np.mean(np.array(source_est_list)[max(0,len(source_est_list)-10):,:],0)))
     scores = { nodeIdToLabel[k]:v for k,v in scores_raw.items() }
     scores = sorted(scores.items(), key=operator.itemgetter(1), reverse=True)
-    print(scores)
-    print(obs_time)
     return (scores[0][0],scores)
 

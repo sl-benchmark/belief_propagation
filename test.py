@@ -9,7 +9,7 @@ random.seed(datetime.now())
 
 
 graph=nx.path_graph(20)
-dist=st.expon()
+dist=st.expon(0.5)
 source=10
 infected = nx.single_source_dijkstra_path_length(graph, source)
 obs=[0,19]
