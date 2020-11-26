@@ -5,7 +5,7 @@ import source_loc as sl
 import scipy.stats as st
 import random
 from datetime import datetime
-random.seed(datetime.now())
+random.seed(random.random())
 
 
 graph=nx.path_graph(20)
